@@ -36,17 +36,26 @@ def get_time():
 
 class TimestampHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        data = get_time()
-        body = json.dumps(data, indent=2).encode()
+        import time
         
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('Content-Length', len(body))
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
-        self.end_headers()
-        self.wfile.write(body)
+        if self.path == '/' or self.path == '':
+            # Redirect a URL con unix timestamp actual
+            unix = str(int(time.time()))
+            self.send_response(302)
+            self.send_header('Location', f'/{unix}')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.end_headers()
+        else:
+            # Cualquier otro path → devolver timestamp actual
+            data = get_time()
+            body = json.dumps(data, indent=2).encode()
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', len(body))
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.end_headers()
+            self.wfile.write(body)
 
     def log_message(self, format, *args):
         pass
